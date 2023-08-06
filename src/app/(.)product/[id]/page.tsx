@@ -7,6 +7,7 @@ import { StarIcon as StarIconOutline } from '@heroicons/react/24/outline';
 import { StarIcon } from '@heroicons/react/24/solid';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
 
 const ProductDetailedPage = () => {
 	const [loading, setLoading] = useState(false);
@@ -15,6 +16,32 @@ const ProductDetailedPage = () => {
 
 	const { id } = useParams();
 	const router = useRouter();
+
+	const handleClick = () => {
+		const products: ProductType[] =
+			JSON.parse(localStorage.getItem('carts') as string) || [];
+
+		const isExistProduct = products.find(c => c.id === product?.id);
+
+		if (isExistProduct) {
+			const updatedData = products.map(c => {
+				if (c.id === product?.id) {
+					return {
+						...c,
+						quantity: c.quantity + 1,
+					};
+				}
+
+				return c;
+			});
+
+			localStorage.setItem('carts', JSON.stringify(updatedData));
+		} else {
+			const data = [...products, { ...product, quantity: 1 }];
+			localStorage.setItem('carts', JSON.stringify(data));
+		}
+		toast('Product added to your bag!!');
+	};
 
 	useEffect(() => {
 		async function getData() {
@@ -107,7 +134,10 @@ const ProductDetailedPage = () => {
 									</div>
 
 									<div className='space-y-3 text-sm'>
-										<button className='button w-full bg-blue-600 text-white border-transparent hover:border-blue-600 hover:bg-transparent hover:text-black'>
+										<button
+											className='button w-full bg-blue-600 text-white border-transparent hover:border-blue-600 hover:bg-transparent hover:text-black'
+											onClick={handleClick}
+										>
 											Add to bag
 										</button>
 										<button
